@@ -2,6 +2,7 @@ import React from 'react';
 import Papa from 'papaparse';
 import { Download, FileText, CheckCircle2, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { DatasetMeta, TrainedModelResult } from '../../types';
+import { safeInt, safeNum } from '../../utils/formatters';
 
 interface ReportsViewProps {
   dataset: DatasetMeta | null;
@@ -64,7 +65,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ dataset, rawRecords, m
             className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            <span>Download CSV ({rawRecords.length.toLocaleString()} rows)</span>
+            <span>Download CSV ({safeInt(rawRecords.length)} rows)</span>
           </button>
         </div>
 

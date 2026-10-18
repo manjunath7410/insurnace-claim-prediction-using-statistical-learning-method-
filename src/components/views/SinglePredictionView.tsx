@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Target, Zap, ShieldAlert, CheckCircle, Info, Sparkles, Sliders, RefreshCw, ChevronDown } from 'lucide-react';
 import { DatasetMeta, PredictionResult, TrainedModelResult } from '../../types';
 import { TransformerPipeline } from '../../utils/mlEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface SinglePredictionViewProps {
   dataset: DatasetMeta | null;
@@ -372,7 +373,7 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
                 <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">MODEL PREDICTION VERDICT</span>
                 <div className="flex items-center justify-between mt-2">
                   <h3 className="text-3xl font-extrabold text-white font-mono">
-                    {(prediction.claimProbability * 100).toFixed(1)}%
+                    {safeNum(prediction.claimProbability * 100, 1)}%
                   </h3>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -392,7 +393,7 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-slate-400 font-mono">
                   <span>Probability Meter</span>
-                  <span>Cutoff: {(prediction.decisionThreshold * 100).toFixed(0)}%</span>
+                  <span>Cutoff: {safeNum(prediction.decisionThreshold * 100, 0)}%</span>
                 </div>
                 <div className="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800">
                   <div
@@ -401,7 +402,7 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
                         ? 'bg-gradient-to-r from-pink-500 to-rose-600'
                         : 'bg-gradient-to-r from-emerald-500 to-cyan-500'
                     }`}
-                    style={{ width: `${Math.min(100, prediction.claimProbability * 100)}%` }}
+                    style={{ width: `${Math.min(100, (isNaN(prediction.claimProbability) ? 0 : prediction.claimProbability) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -415,7 +416,7 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
                       <div className="flex justify-between font-mono font-bold">
                         <span className="text-slate-200">{f.feature}</span>
                         <span className={f.impact > 0 ? 'text-pink-400' : 'text-emerald-400'}>
-                          {f.impact > 0 ? `+${(f.impact * 100).toFixed(1)}%` : `${(f.impact * 100).toFixed(1)}%`}
+                          {f.impact > 0 ? `+${safeNum(f.impact * 100, 1)}%` : `${safeNum(f.impact * 100, 1)}%`}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-400">{f.description}</p>

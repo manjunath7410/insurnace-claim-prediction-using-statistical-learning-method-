@@ -13,6 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { UserRole, UserSession } from '../types';
+import { safeInt } from '../utils/formatters';
 
 export type DeviceViewMode = 'laptop' | 'tablet' | 'mobile';
 
@@ -110,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Dataset Sync Status */}
         <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 border border-slate-800 rounded-xl text-xs text-slate-300">
           <Database className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="font-mono tabular-nums font-semibold text-white">{datasetRowsCount.toLocaleString()}</span>
+          <span className="font-mono tabular-nums font-semibold text-white">{safeInt(datasetRowsCount)}</span>
           <span className="text-slate-500">records</span>
           <button
             onClick={onRefreshSync}

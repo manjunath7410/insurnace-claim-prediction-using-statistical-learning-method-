@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { DatasetMeta } from '../../types';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface DataQualityViewProps {
   dataset: DatasetMeta | null;
@@ -51,7 +52,7 @@ export const DataQualityView: React.FC<DataQualityViewProps> = ({ dataset }) => 
             )}
           </div>
           <div className="text-3xl font-extrabold font-mono text-white">
-            {dataset.missingTotalCount} missing
+            {safeInt(dataset.missingTotalCount)} missing
           </div>
           <p className="text-xs text-slate-400">
             {missingCols.length === 0
@@ -66,7 +67,7 @@ export const DataQualityView: React.FC<DataQualityViewProps> = ({ dataset }) => 
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-3xl font-extrabold font-mono text-cyan-400">
-            {dataset.duplicateRowsCount} duplicates
+            {safeInt(dataset.duplicateRowsCount)} duplicates
           </div>
           <p className="text-xs text-slate-400">
             {dataset.duplicateRowsCount === 0
@@ -81,7 +82,7 @@ export const DataQualityView: React.FC<DataQualityViewProps> = ({ dataset }) => 
             <ShieldAlert className="w-4 h-4 text-pink-400" />
           </div>
           <div className="text-3xl font-extrabold font-mono text-pink-400">
-            {dataset.classDistribution.positiveRatio}% Claims
+            {safeNum(dataset.classDistribution?.positiveRatio, 2)}% Claims
           </div>
           <p className="text-xs text-slate-400">
             Imbalanced classification detected. Stratified splits & class weighting applied.
@@ -118,24 +119,28 @@ export const DataQualityView: React.FC<DataQualityViewProps> = ({ dataset }) => 
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {numericCols.map((col) => {
-                const iqr = (col.q75 || 0) - (col.q25 || 0);
-                const lower = Number(((col.q25 || 0) - 1.5 * iqr).toFixed(2));
-                const upper = Number(((col.q75 || 0) + 1.5 * iqr).toFixed(2));
+                const q25Val = col.q25 ?? 0;
+                const q75Val = col.q75 ?? 0;
+                const iqr = q75Val - q25Val;
+                const rawLower = q25Val - 1.5 * iqr;
+                const rawUpper = q75Val + 1.5 * iqr;
+                const lowerStr = safeNum(rawLower, 2);
+                const upperStr = safeNum(rawUpper, 2);
 
                 return (
                   <tr key={col.name} className="hover:bg-slate-900/60 transition-colors">
                     <td className="px-4 py-2.5 font-bold text-white">{col.name}</td>
                     <td className="px-4 py-2.5">
-                      {col.mean} ± {col.std}
+                      {safeNum(col.mean, 2)} ± {safeNum(col.std, 2)}
                     </td>
                     <td className="px-4 py-2.5">
-                      {col.median} ({col.q25} - {col.q75})
+                      {safeNum(col.median, 2)} ({safeNum(col.q25, 2)} - {safeNum(col.q75, 2)})
                     </td>
                     <td className="px-4 py-2.5">
-                      {col.min} to {col.max}
+                      {safeNum(col.min, 2)} to {safeNum(col.max, 2)}
                     </td>
                     <td className="px-4 py-2.5 text-cyan-400">
-                      [{lower}, {upper}]
+                      [{lowerStr}, {upperStr}]
                     </td>
                   </tr>
                 );

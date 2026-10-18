@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import { Layers, Download, CheckCircle, RefreshCw, AlertTriangle, FileSpreadsheet, Zap, UploadCloud, Info } from 'lucide-react';
 import { BatchPredictionSummary, DatasetMeta, PredictionResult, TrainedModelResult } from '../../types';
 import { TransformerPipeline } from '../../utils/mlEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface BatchPredictionViewProps {
   dataset: DatasetMeta | null;
@@ -301,7 +302,7 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
             <div className="bg-[#111827]/90 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-1">
               <div className="text-xs text-slate-400 uppercase font-medium">Scored Records</div>
               <div className="text-3xl font-bold font-mono text-white">
-                {summary.totalRecords.toLocaleString()}
+                {safeInt(summary.totalRecords)}
               </div>
               <p className="text-[11px] text-emerald-400">100% processed without leakage</p>
             </div>
@@ -309,17 +310,17 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
             <div className="bg-[#111827]/90 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-1">
               <div className="text-xs text-slate-400 uppercase font-medium">Predicted Claims</div>
               <div className="text-3xl font-bold font-mono text-pink-400">
-                {summary.totalClaimsPredicted.toLocaleString()}
+                {safeInt(summary.totalClaimsPredicted)}
               </div>
               <p className="text-[11px] text-slate-400">
-                {((summary.totalClaimsPredicted / summary.totalRecords) * 100).toFixed(1)}% predicted claim rate
+                {safeNum(summary.totalRecords > 0 ? (summary.totalClaimsPredicted / summary.totalRecords) * 100 : 0, 1)}% predicted claim rate
               </p>
             </div>
 
             <div className="bg-[#111827]/90 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-1">
               <div className="text-xs text-slate-400 uppercase font-medium">High / Critical Flags</div>
               <div className="text-3xl font-bold font-mono text-amber-400">
-                {summary.highRiskCount.toLocaleString()}
+                {safeInt(summary.highRiskCount)}
               </div>
               <p className="text-[11px] text-slate-400">Flagged for underwriting audit</p>
             </div>
@@ -327,7 +328,7 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
             <div className="bg-[#111827]/90 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-1">
               <div className="text-xs text-slate-400 uppercase font-medium">Vector Latency</div>
               <div className="text-3xl font-bold font-mono text-cyan-400">
-                {summary.processingTimeMs} ms
+                {safeNum(summary.processingTimeMs, 1)} ms
               </div>
               <p className="text-[11px] text-slate-400">Optimized streaming batch</p>
             </div>
@@ -345,7 +346,7 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
               className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
             >
               <Download className="w-4 h-4" />
-              <span>Export CSV ({summary.totalRecords.toLocaleString()} Records)</span>
+              <span>Export CSV ({safeInt(summary.totalRecords)} Records)</span>
             </button>
           </div>
 
@@ -370,7 +371,7 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
                     <tr key={p.id} className="hover:bg-slate-900/60 transition-colors">
                       <td className="px-4 py-2.5 font-bold text-white">{p.policyId}</td>
                       <td className="px-4 py-2.5 font-bold text-cyan-400">
-                        {(p.claimProbability * 100).toFixed(1)}%
+                        {safeNum(p.claimProbability * 100, 1)}%
                       </td>
                       <td className="px-4 py-2.5">
                         <span className={p.predictedClass === 1 ? 'text-pink-400 font-bold' : 'text-emerald-400 font-bold'}>
@@ -380,8 +381,8 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
                       <td className="px-4 py-2.5 font-sans">
                         <span className="font-semibold text-slate-200">{p.riskTier}</span>
                       </td>
-                      <td className="px-4 py-2.5">{p.inputRecord.area_cluster}</td>
-                      <td className="px-4 py-2.5">{p.inputRecord.population_density}</td>
+                      <td className="px-4 py-2.5">{safeDisplay(p.inputRecord.area_cluster)}</td>
+                      <td className="px-4 py-2.5">{safeDisplay(p.inputRecord.population_density)}</td>
                     </tr>
                   ))}
                 </tbody>

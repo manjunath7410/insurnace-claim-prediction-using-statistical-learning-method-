@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, HelpCircle, BarChart3, Info } from 'lucide-react';
 import { TrainedModelResult } from '../../types';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface ExplainabilityViewProps {
   activeModel: TrainedModelResult | null;
@@ -45,7 +46,7 @@ export const ExplainabilityView: React.FC<ExplainabilityViewProps> = ({ activeMo
             <div key={item.feature} className="space-y-1">
               <div className="flex justify-between text-xs font-mono font-semibold">
                 <span className="text-slate-300">{item.feature}</span>
-                <span className="text-cyan-400">{(item.importance * 100).toFixed(1)}%</span>
+                <span className="text-cyan-400">{safeNum(item.importance * 100, 1)}%</span>
               </div>
               <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
                 <div
@@ -78,8 +79,8 @@ export const ExplainabilityView: React.FC<ExplainabilityViewProps> = ({ activeMo
                 {activeModel.oddsRatios.map((o) => (
                   <tr key={o.feature} className="hover:bg-slate-900/60 transition-colors">
                     <td className="px-4 py-2.5 font-bold text-white">{o.feature}</td>
-                    <td className="px-4 py-2.5">{o.coefficient}</td>
-                    <td className="px-4 py-2.5 font-bold text-cyan-400">{o.oddsRatio}</td>
+                    <td className="px-4 py-2.5">{safeNum(o.coefficient, 4)}</td>
+                    <td className="px-4 py-2.5 font-bold text-cyan-400">{safeNum(o.oddsRatio, 4)}</td>
                     <td className="px-4 py-2.5 font-sans">
                       {o.oddsRatio > 1.0 ? (
                         <span className="text-pink-400 font-semibold">Elevates Claim Risk</span>

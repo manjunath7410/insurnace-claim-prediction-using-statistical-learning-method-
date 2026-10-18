@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GitCompare, Award, BarChart2, ShieldAlert, Sliders, Zap } from 'lucide-react';
 import { TrainedModelResult } from '../../types';
 import { evaluateModelPredictions } from '../../utils/mlEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface ModelComparisonViewProps {
   models: TrainedModelResult[];
@@ -84,13 +85,13 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
                       <span className="px-2 py-0.5 bg-violet-600 text-white text-[10px] rounded-full">Active</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">{m.metrics.accuracy}</td>
-                  <td className="px-4 py-3">{m.metrics.precision}</td>
-                  <td className="px-4 py-3">{m.metrics.recall}</td>
-                  <td className="px-4 py-3 font-bold text-cyan-400">{m.metrics.f1Score}</td>
-                  <td className="px-4 py-3 font-bold text-emerald-400">{m.metrics.rocAuc}</td>
-                  <td className="px-4 py-3">{m.metrics.prAuc}</td>
-                  <td className="px-4 py-3 text-slate-400">{m.metrics.trainingTimeMs} ms</td>
+                  <td className="px-4 py-3">{safeNum(m.metrics.accuracy, 4)}</td>
+                  <td className="px-4 py-3">{safeNum(m.metrics.precision, 4)}</td>
+                  <td className="px-4 py-3">{safeNum(m.metrics.recall, 4)}</td>
+                  <td className="px-4 py-3 font-bold text-cyan-400">{safeNum(m.metrics.f1Score, 4)}</td>
+                  <td className="px-4 py-3 font-bold text-emerald-400">{safeNum(m.metrics.rocAuc, 4)}</td>
+                  <td className="px-4 py-3">{safeNum(m.metrics.prAuc, 4)}</td>
+                  <td className="px-4 py-3 text-slate-400">{safeNum(m.metrics.trainingTimeMs, 1)} ms</td>
                 </tr>
               ))}
             </tbody>
@@ -116,14 +117,14 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
             <div>
               <div className="flex justify-between text-xs font-semibold text-slate-300 mb-1">
                 <span>Classification Threshold (τ)</span>
-                <span className="font-mono text-cyan-400 text-base font-extrabold">{decisionThreshold.toFixed(2)}</span>
+                <span className="font-mono text-cyan-400 text-base font-extrabold">{safeNum(decisionThreshold, 2)}</span>
               </div>
               <input
                 type="range"
                 min="0.05"
                 max="0.95"
                 step="0.01"
-                value={decisionThreshold}
+                value={isNaN(decisionThreshold) ? 0.5 : decisionThreshold}
                 onChange={(e) => setDecisionThreshold(Number(e.target.value))}
                 className="w-full accent-cyan-400"
               />
@@ -141,8 +142,8 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
                   <label className="text-[11px] text-slate-400 block mb-1">False Alarm Cost ($/FP)</label>
                   <input
                     type="number"
-                    value={costFP}
-                    onChange={(e) => setCostFP(Number(e.target.value))}
+                    value={isNaN(costFP) ? '' : costFP}
+                    onChange={(e) => setCostFP(e.target.value === '' ? 0 : Number(e.target.value))}
                     className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-white"
                   />
                 </div>
@@ -150,8 +151,8 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
                   <label className="text-[11px] text-slate-400 block mb-1">Missed Claim Cost ($/FN)</label>
                   <input
                     type="number"
-                    value={costFN}
-                    onChange={(e) => setCostFN(Number(e.target.value))}
+                    value={isNaN(costFN) ? '' : costFN}
+                    onChange={(e) => setCostFN(e.target.value === '' ? 0 : Number(e.target.value))}
                     className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-white"
                   />
                 </div>
@@ -160,7 +161,7 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
               <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
                 <span className="font-semibold text-slate-300">Expected Total Risk Liability:</span>
                 <span className="font-mono font-bold text-rose-400 text-base">
-                  ${totalFinancialCost.toLocaleString()}
+                  ${safeInt(totalFinancialCost)}
                 </span>
               </div>
             </div>
@@ -176,25 +177,25 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
           <div className="grid grid-cols-2 gap-4 font-mono">
             <div className="p-5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-y-1 glow-emerald">
               <div className="text-[11px] text-emerald-300 font-sans font-semibold">True Negatives (TN)</div>
-              <div className="text-2xl font-extrabold text-emerald-400">{cm.tn.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-emerald-400">{safeInt(cm.tn)}</div>
               <p className="text-[10px] text-emerald-300/70 font-sans">Correct non-claim policies</p>
             </div>
 
             <div className="p-5 bg-amber-950/40 border border-amber-500/30 rounded-xl space-y-1">
               <div className="text-[11px] text-amber-300 font-sans font-semibold">False Positives (FP)</div>
-              <div className="text-2xl font-extrabold text-amber-400">{cm.fp.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-amber-400">{safeInt(cm.fp)}</div>
               <p className="text-[10px] text-amber-300/70 font-sans">Unnecessary alert audits</p>
             </div>
 
             <div className="p-5 bg-rose-950/40 border border-rose-500/30 rounded-xl space-y-1 glow-magenta">
               <div className="text-[11px] text-rose-300 font-sans font-semibold">False Negatives (FN)</div>
-              <div className="text-2xl font-extrabold text-rose-400">{cm.fn.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-rose-400">{safeInt(cm.fn)}</div>
               <p className="text-[10px] text-rose-300/70 font-sans">Missed claims (Loss risk)</p>
             </div>
 
             <div className="p-5 bg-cyan-950/40 border border-cyan-500/30 rounded-xl space-y-1 glow-cyan">
               <div className="text-[11px] text-cyan-300 font-sans font-semibold">True Positives (TP)</div>
-              <div className="text-2xl font-extrabold text-cyan-400">{cm.tp.toLocaleString()}</div>
+              <div className="text-2xl font-extrabold text-cyan-400">{safeInt(cm.tp)}</div>
               <p className="text-[10px] text-cyan-300/70 font-sans">Claims correctly caught</p>
             </div>
           </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BarChart3, Grid, Layers, ArrowUpRight, Sparkles } from 'lucide-react';
 import { DatasetMeta } from '../../types';
 import { calculateCorrelationMatrix } from '../../utils/statEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface EDAViewProps {
   dataset: DatasetMeta | null;
@@ -71,7 +72,7 @@ export const EDAView: React.FC<EDAViewProps> = ({ dataset, rawRecords }) => {
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="font-semibold text-slate-200">{cat.value}</span>
                   <span className="text-cyan-400">
-                    {cat.count.toLocaleString()} ({cat.pct}%)
+                    {safeInt(cat.count)} ({safeNum(cat.pct, 1)}%)
                   </span>
                 </div>
                 <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
@@ -108,19 +109,19 @@ export const EDAView: React.FC<EDAViewProps> = ({ dataset, rawRecords }) => {
               <div className="grid grid-cols-2 gap-4 pt-2 font-mono">
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800">
                   <div className="text-[11px] text-slate-400 font-sans uppercase">Mean Value</div>
-                  <div className="text-xl font-bold text-white mt-1">{meta?.mean ?? '-'}</div>
+                  <div className="text-xl font-bold text-white mt-1">{safeNum(meta?.mean, 2)}</div>
                 </div>
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800">
                   <div className="text-[11px] text-slate-400 font-sans uppercase">Standard Deviation</div>
-                  <div className="text-xl font-bold text-cyan-400 mt-1">{meta?.std ?? '-'}</div>
+                  <div className="text-xl font-bold text-cyan-400 mt-1">{safeNum(meta?.std, 2)}</div>
                 </div>
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800">
                   <div className="text-[11px] text-slate-400 font-sans uppercase">Median (Q2)</div>
-                  <div className="text-xl font-bold text-violet-400 mt-1">{meta?.median ?? '-'}</div>
+                  <div className="text-xl font-bold text-violet-400 mt-1">{safeNum(meta?.median, 2)}</div>
                 </div>
                 <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800">
                   <div className="text-[11px] text-slate-400 font-sans uppercase">Min - Max Range</div>
-                  <div className="text-base font-bold text-slate-300 mt-1">{meta?.min} to {meta?.max}</div>
+                  <div className="text-base font-bold text-slate-300 mt-1">{safeNum(meta?.min, 2)} to {safeNum(meta?.max, 2)}</div>
                 </div>
               </div>
             );
@@ -166,7 +167,7 @@ export const EDAView: React.FC<EDAViewProps> = ({ dataset, rawRecords }) => {
                             : 'text-slate-400'
                         }`}
                       >
-                        {val.toFixed(2)}
+                        {safeNum(val, 2)}
                       </td>
                     );
                   })}

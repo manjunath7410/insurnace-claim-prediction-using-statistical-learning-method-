@@ -238,17 +238,30 @@ export function analyzeDataset(
     let categories: ColumnMeta['categories'];
 
     if (colType === 'numerical' || (isNumericCandidate && uniqueCount > 1)) {
-      const numVals = values.map((v) => Number(v)).sort((a, b) => a - b);
+      const numVals = values
+        .map((v) => Number(v))
+        .filter((v) => !isNaN(v) && isFinite(v))
+        .sort((a, b) => a - b);
       if (numVals.length > 0) {
         min = numVals[0];
         max = numVals[numVals.length - 1];
         const sum = numVals.reduce((acc, v) => acc + v, 0);
-        mean = Number((sum / numVals.length).toFixed(4));
-        const variance = numVals.reduce((acc, v) => acc + Math.pow(v - mean!, 2), 0) / numVals.length;
-        std = Number(Math.sqrt(variance).toFixed(4));
+        const rawMean = sum / numVals.length;
+        mean = isNaN(rawMean) || !isFinite(rawMean) ? 0 : Number(rawMean.toFixed(4));
+        const variance = numVals.reduce((acc, v) => acc + Math.pow(v - (mean ?? 0), 2), 0) / (numVals.length || 1);
+        const rawStd = Math.sqrt(Math.max(0, variance));
+        std = isNaN(rawStd) || !isFinite(rawStd) ? 0 : Number(rawStd.toFixed(4));
         median = getQuantile(numVals, 0.5);
         q25 = getQuantile(numVals, 0.25);
         q75 = getQuantile(numVals, 0.75);
+      } else {
+        min = 0;
+        max = 0;
+        mean = 0;
+        std = 0;
+        median = 0;
+        q25 = 0;
+        q75 = 0;
       }
     }
 
@@ -322,14 +335,16 @@ export function analyzeDataset(
 }
 
 function getQuantile(sortedArr: number[], q: number): number {
-  if (sortedArr.length === 0) return 0;
+  if (!sortedArr || sortedArr.length === 0) return 0;
   const pos = (sortedArr.length - 1) * q;
   const base = Math.floor(pos);
   const rest = pos - base;
   if (sortedArr[base + 1] !== undefined) {
-    return Number((sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base])).toFixed(4));
+    const val = sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
+    return isNaN(val) || !isFinite(val) ? 0 : Number(val.toFixed(4));
   } else {
-    return Number(sortedArr[base].toFixed(4));
+    const val = sortedArr[base];
+    return isNaN(val) || !isFinite(val) ? 0 : Number(val.toFixed(4));
   }
 }
 
@@ -342,6 +357,13 @@ export function calculateCorrelationMatrix(
 ): { columns: string[]; matrix: number[][] } {
   const n = records.length;
   const m = columns.length;
+  const matrix: number[][] = Array.from({ length: m }, () => new Array(m).fill(0));
+
+  if (n <= 1 || m === 0) {
+    for (let i = 0; i < m; i++) matrix[i][i] = 1.0;
+    return { columns, matrix };
+  }
+
   const means: number[] = new Array(m).fill(0);
   const stds: number[] = new Array(m).fill(0);
 
@@ -349,7 +371,8 @@ export function calculateCorrelationMatrix(
   for (let i = 0; i < n; i++) {
     const row: number[] = [];
     for (let j = 0; j < m; j++) {
-      row.push(Number(records[i][columns[j]]) || 0);
+      const val = Number(records[i][columns[j]]);
+      row.push(isNaN(val) ? 0 : val);
     }
     parsedData.push(row);
   }
@@ -368,15 +391,13 @@ export function calculateCorrelationMatrix(
     stds[j] = Math.sqrt(sqSum / n);
   }
 
-  const matrix: number[][] = Array.from({ length: m }, () => new Array(m).fill(0));
-
   for (let j1 = 0; j1 < m; j1++) {
     for (let j2 = 0; j2 < m; j2++) {
       if (j1 === j2) {
         matrix[j1][j2] = 1.0;
         continue;
       }
-      if (stds[j1] === 0 || stds[j2] === 0) {
+      if (stds[j1] === 0 || stds[j2] === 0 || isNaN(stds[j1]) || isNaN(stds[j2])) {
         matrix[j1][j2] = 0.0;
         continue;
       }
@@ -385,7 +406,8 @@ export function calculateCorrelationMatrix(
         cov += (parsedData[i][j1] - means[j1]) * (parsedData[i][j2] - means[j2]);
       }
       cov /= n;
-      const r = cov / (stds[j1] * stds[j2]);
+      const rawR = cov / (stds[j1] * stds[j2]);
+      const r = isNaN(rawR) ? 0 : Math.max(-1.0, Math.min(1.0, rawR));
       matrix[j1][j2] = Number(r.toFixed(3));
     }
   }
@@ -454,20 +476,24 @@ export function runChiSquareTest(
 
   const significant = pValue < 0.05;
 
+  const safeChi2 = isNaN(chi2) || !isFinite(chi2) ? 0 : chi2;
+  const safePValue = isNaN(pValue) || !isFinite(pValue) ? 1.0 : Math.max(0, Math.min(1.0, pValue));
+  const safeCramersV = isNaN(cramersV) || !isFinite(cramersV) ? 0 : cramersV;
+
   return {
     featureName,
     featureType: 'categorical',
     testType: 'chi_square',
     statisticName: 'Chi-Square (χ²)',
-    statisticValue: Number(chi2.toFixed(3)),
+    statisticValue: Number(safeChi2.toFixed(3)),
     degreesOfFreedom: df,
-    pValue: Number(pValue.toExponential(3)),
+    pValue: Number(safePValue.toExponential(3)),
     significant,
     effectSizeName: "Cramer's V",
-    effectSizeValue: Number(cramersV.toFixed(3)),
+    effectSizeValue: Number(safeCramersV.toFixed(3)),
     effectInterpretation,
     conclusion: significant
-      ? `Statistically significant association detected between ${featureName} and ${targetName} (p < 0.05, Cramer's V = ${cramersV.toFixed(3)}).`
+      ? `Statistically significant association detected between ${featureName} and ${targetName} (p < 0.05, Cramer's V = ${safeCramersV.toFixed(3)}).`
       : `No statistically significant association found between ${featureName} and ${targetName} (p ≥ 0.05).`,
   };
 }
@@ -547,21 +573,29 @@ export function runWelchTTest(
 
   const significant = pValue < 0.05;
 
+  const safeT = isNaN(tStat) || !isFinite(tStat) ? 0 : tStat;
+  const safeDf = isNaN(df) || !isFinite(df) ? 1 : df;
+  const safeP = isNaN(pValue) || !isFinite(pValue) ? 1.0 : Math.max(0, Math.min(1.0, pValue));
+  const safeD = isNaN(cohensD) || !isFinite(cohensD) ? 0 : cohensD;
+
   return {
     featureName,
     featureType: 'numerical',
     testType: 'welch_ttest',
     statisticName: "Welch's t",
-    statisticValue: Number(tStat.toFixed(3)),
-    degreesOfFreedom: Number(df.toFixed(1)),
-    pValue: Number(pValue.toExponential(3)),
+    statisticValue: Number(safeT.toFixed(3)),
+    degreesOfFreedom: Number(safeDf.toFixed(1)),
+    pValue: Number(safeP.toExponential(3)),
     significant,
     effectSizeName: "Cohen's d",
-    effectSizeValue: Number(cohensD.toFixed(3)),
+    effectSizeValue: Number(safeD.toFixed(3)),
     effectInterpretation,
-    confidenceInterval95: [ciLower, ciUpper],
+    confidenceInterval95: [
+      isNaN(ciLower) || !isFinite(ciLower) ? 0 : ciLower,
+      isNaN(ciUpper) || !isFinite(ciUpper) ? 0 : ciUpper,
+    ],
     conclusion: significant
-      ? `Statistically significant mean difference found for ${featureName} across claim groups (t = ${tStat.toFixed(3)}, p < 0.05, Cohen's d = ${cohensD.toFixed(3)}).`
+      ? `Statistically significant mean difference found for ${featureName} across claim groups (t = ${safeT.toFixed(3)}, p < 0.05, Cohen's d = ${safeD.toFixed(3)}).`
       : `No significant mean difference for ${featureName} across claim groups (p ≥ 0.05).`,
   };
 }
@@ -648,19 +682,23 @@ export function runMannWhitneyUTest(
 
   const significant = pValue < 0.05;
 
+  const safeUMin = isNaN(uMin) || !isFinite(uMin) ? 0 : uMin;
+  const safeP = isNaN(pValue) || !isFinite(pValue) ? 1.0 : Math.max(0, Math.min(1.0, pValue));
+  const safeR = isNaN(rankBiserial) || !isFinite(rankBiserial) ? 0 : rankBiserial;
+
   return {
     featureName,
     featureType: 'numerical',
     testType: 'mann_whitney_u',
     statisticName: 'Mann-Whitney U',
-    statisticValue: Number(uMin.toFixed(1)),
-    pValue: Number(pValue.toExponential(3)),
+    statisticValue: Number(safeUMin.toFixed(1)),
+    pValue: Number(safeP.toExponential(3)),
     significant,
     effectSizeName: 'Rank Biserial Correlation',
-    effectSizeValue: Number(rankBiserial.toFixed(3)),
+    effectSizeValue: Number(safeR.toFixed(3)),
     effectInterpretation,
     conclusion: significant
-      ? `Statistically significant distribution shift observed for ${featureName} via Mann-Whitney U test (U = ${uMin.toFixed(0)}, p < 0.05).`
+      ? `Statistically significant distribution shift observed for ${featureName} via Mann-Whitney U test (U = ${safeUMin.toFixed(0)}, p < 0.05).`
       : `No significant distribution difference detected for ${featureName} (p ≥ 0.05).`,
   };
 }
@@ -690,11 +728,12 @@ export function applyFDRCorrection(results: StatisticalTestResult[]): Statistica
   const adjMap = new Map(adjusted.map((item) => [item.idx, item.adjP]));
 
   return results.map((res, idx) => {
-    const adjP = adjMap.get(idx) ?? res.pValue;
+    const rawAdj = adjMap.get(idx) ?? res.pValue;
+    const safeAdj = isNaN(rawAdj) || !isFinite(rawAdj) ? 1.0 : Math.max(0, Math.min(1.0, rawAdj));
     return {
       ...res,
-      adjustedPValue: Number(adjP.toExponential(3)),
-      significant: adjP < 0.05,
+      adjustedPValue: Number(safeAdj.toExponential(3)),
+      significant: safeAdj < 0.05,
     };
   });
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Cpu, Play, CheckCircle2, ShieldCheck, Settings, RefreshCw, Zap } from 'lucide-react';
 import { DatasetMeta, ModelType, PreprocessingConfig, TrainedModelResult } from '../../types';
 import { stratifiedTrainTestSplit, trainModel, TransformerPipeline } from '../../utils/mlEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface ModelTrainingViewProps {
   dataset: DatasetMeta | null;
@@ -161,27 +162,27 @@ export const ModelTrainingView: React.FC<ModelTrainingViewProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                    Gradient Descent Epochs ({lrEpochs})
+                    Gradient Descent Epochs ({safeInt(lrEpochs)})
                   </label>
                   <input
                     type="range"
                     min="50"
                     max="300"
-                    value={lrEpochs}
+                    value={isNaN(lrEpochs) ? 120 : lrEpochs}
                     onChange={(e) => setLrEpochs(Number(e.target.value))}
                     className="w-full accent-violet-600"
                   />
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                    Learning Rate ({lrLearningRate})
+                    Learning Rate ({safeNum(lrLearningRate, 2)})
                   </label>
                   <input
                     type="range"
                     min="0.01"
                     max="0.2"
                     step="0.01"
-                    value={lrLearningRate}
+                    value={isNaN(lrLearningRate) ? 0.05 : lrLearningRate}
                     onChange={(e) => setLrLearningRate(Number(e.target.value))}
                     className="w-full accent-violet-600"
                   />
@@ -192,13 +193,13 @@ export const ModelTrainingView: React.FC<ModelTrainingViewProps> = ({
             {selectedModel === 'decision_tree' && (
               <div>
                 <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                  Maximum Tree Depth ({dtMaxDepth})
+                  Maximum Tree Depth ({safeInt(dtMaxDepth)})
                 </label>
                 <input
                   type="range"
                   min="3"
                   max="12"
-                  value={dtMaxDepth}
+                  value={isNaN(dtMaxDepth) ? 6 : dtMaxDepth}
                   onChange={(e) => setDtMaxDepth(Number(e.target.value))}
                   className="w-full accent-violet-600"
                 />
@@ -208,13 +209,13 @@ export const ModelTrainingView: React.FC<ModelTrainingViewProps> = ({
             {selectedModel === 'random_forest' && (
               <div>
                 <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                  Number of Estimator Trees ({rfEstimators})
+                  Number of Estimator Trees ({safeInt(rfEstimators)})
                 </label>
                 <input
                   type="range"
                   min="5"
                   max="50"
-                  value={rfEstimators}
+                  value={isNaN(rfEstimators) ? 15 : rfEstimators}
                   onChange={(e) => setRfEstimators(Number(e.target.value))}
                   className="w-full accent-violet-600"
                 />
@@ -224,13 +225,13 @@ export const ModelTrainingView: React.FC<ModelTrainingViewProps> = ({
             {selectedModel === 'gradient_boosting' && (
               <div>
                 <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                  Number of Boosting Stages ({gbEstimators})
+                  Number of Boosting Stages ({safeInt(gbEstimators)})
                 </label>
                 <input
                   type="range"
                   min="5"
                   max="40"
-                  value={gbEstimators}
+                  value={isNaN(gbEstimators) ? 15 : gbEstimators}
                   onChange={(e) => setGbEstimators(Number(e.target.value))}
                   className="w-full accent-violet-600"
                 />
@@ -257,14 +258,14 @@ export const ModelTrainingView: React.FC<ModelTrainingViewProps> = ({
 
             <div>
               <label className="text-xs font-semibold text-slate-300 block mb-1">
-                Stratified Test Split ({(testRatio * 100).toFixed(0)}%)
+                Stratified Test Split ({safeNum(testRatio * 100, 0)}%)
               </label>
               <input
                 type="range"
                 min="0.15"
                 max="0.35"
                 step="0.05"
-                value={testRatio}
+                value={isNaN(testRatio) ? 0.2 : testRatio}
                 onChange={(e) => setTestRatio(Number(e.target.value))}
                 className="w-full mt-2 accent-violet-600"
               />

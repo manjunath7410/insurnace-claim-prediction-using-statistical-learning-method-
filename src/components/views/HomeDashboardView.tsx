@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { DatasetMeta, TrainedModelResult } from '../../types';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface HomeDashboardViewProps {
   dataset: DatasetMeta | null;
@@ -153,7 +154,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
           </div>
           <div className="text-3xl font-extrabold font-mono tabular-nums text-violet-300">
-            {bestModel ? bestModel.metrics.rocAuc : '0.963'}
+            {bestModel ? safeNum(bestModel.metrics.rocAuc, 3, '0.963') : '0.963'}
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
             {bestModel ? bestModel.modelName : 'GRADIENT BOOSTING AUC'}
@@ -166,7 +167,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>
           <div className="text-3xl font-extrabold font-mono tabular-nums text-emerald-300">
-            {bestModel ? bestModel.metrics.f1Score : '0.933'}
+            {bestModel ? safeNum(bestModel.metrics.f1Score, 3, '0.933') : '0.933'}
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
             BALANCED RECALL & PRECISION
@@ -179,7 +180,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
           </div>
           <div className="text-3xl font-extrabold font-mono tabular-nums text-amber-300">
-            {bestModel ? bestModel.metrics.prAuc : '0.880'}
+            {bestModel ? safeNum(bestModel.metrics.prAuc, 3, '0.880') : '0.880'}
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
             PRECISION-RECALL INTEGRAL
@@ -192,7 +193,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
           </div>
           <div className="text-3xl font-extrabold font-mono tabular-nums text-cyan-300">
-            {bestModel ? bestModel.metrics.accuracy : '0.897'}
+            {bestModel ? safeNum(bestModel.metrics.accuracy, 3, '0.897') : '0.897'}
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
             CROSS-CLASS VERIFICATION
@@ -227,7 +228,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
               <div key={f.name} className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
                   <span className="text-slate-300">{f.name}</span>
-                  <span className="text-violet-400 font-bold">{(f.score * 100).toFixed(0)}%</span>
+                  <span className="text-violet-400 font-bold">{safeNum(f.score * 100, 0)}%</span>
                 </div>
                 <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
                   <div
@@ -420,7 +421,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
                     </span>
                   </td>
                   <td className="px-4 py-3 font-bold text-white text-sm">
-                    {p.riskScore}%
+                    {safeNum(p.riskScore, 1)}%
                   </td>
                   <td className="px-4 py-3 font-bold text-cyan-400">
                     {p.impact}

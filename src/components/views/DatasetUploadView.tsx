@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { DatasetMeta } from '../../types';
 import { analyzeDataset } from '../../utils/statEngine';
+import { safeDisplay, safeInt, safeNum } from '../../utils/formatters';
 
 interface DatasetUploadViewProps {
   dataset: DatasetMeta | null;
@@ -188,28 +189,28 @@ export const DatasetUploadView: React.FC<DatasetUploadViewProps> = ({
             <div className="bg-[#111827]/90 p-4 rounded-2xl border border-slate-800">
               <div className="text-[11px] text-slate-400 font-medium uppercase">Total Records</div>
               <div className="text-2xl font-bold font-mono tabular-nums text-white mt-1">
-                {dataset.totalRows.toLocaleString()}
+                {safeInt(dataset.totalRows)}
               </div>
             </div>
 
             <div className="bg-[#111827]/90 p-4 rounded-2xl border border-slate-800">
               <div className="text-[11px] text-slate-400 font-medium uppercase">Features Count</div>
               <div className="text-2xl font-bold font-mono tabular-nums text-cyan-400 mt-1">
-                {dataset.totalCols}
+                {safeInt(dataset.totalCols)}
               </div>
             </div>
 
             <div className="bg-[#111827]/90 p-4 rounded-2xl border border-slate-800">
               <div className="text-[11px] text-slate-400 font-medium uppercase">Missing Values</div>
               <div className="text-2xl font-bold font-mono tabular-nums text-emerald-400 mt-1">
-                {dataset.missingTotalCount}
+                {safeInt(dataset.missingTotalCount)}
               </div>
             </div>
 
             <div className="bg-[#111827]/90 p-4 rounded-2xl border border-slate-800">
               <div className="text-[11px] text-slate-400 font-medium uppercase">Claim Rate (Target=1)</div>
               <div className="text-2xl font-bold font-mono tabular-nums text-pink-400 mt-1">
-                {dataset.classDistribution.positiveRatio}%
+                {safeNum(dataset.classDistribution?.positiveRatio, 2)}%
               </div>
             </div>
           </div>
@@ -268,16 +269,16 @@ export const DatasetUploadView: React.FC<DatasetUploadViewProps> = ({
                         </span>
                       </td>
                       <td className="px-4 py-2.5 tabular-nums">
-                        {col.uniqueCount.toLocaleString()}
+                        {safeInt(col.uniqueCount)}
                       </td>
                       <td className="px-4 py-2.5 tabular-nums">
-                        {col.missingPct}%
+                        {safeNum(col.missingPct, 2)}%
                       </td>
                       <td className="px-4 py-2.5 truncate max-w-[150px]">
-                        {col.type === 'numerical' ? col.mean ?? '-' : col.mode ?? '-'}
+                        {col.type === 'numerical' ? safeNum(col.mean, 2) : safeDisplay(col.mode)}
                       </td>
                       <td className="px-4 py-2.5 text-slate-400">
-                        {col.type === 'numerical' ? `${col.min} to ${col.max}` : '-'}
+                        {col.type === 'numerical' ? `${safeNum(col.min, 2)} to ${safeNum(col.max, 2)}` : '-'}
                       </td>
                     </tr>
                   ))}

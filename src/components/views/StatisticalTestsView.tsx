@@ -7,6 +7,7 @@ import {
   runMannWhitneyUTest,
   applyFDRCorrection,
 } from '../../utils/statEngine';
+import { safeDisplay, safeNum } from '../../utils/formatters';
 
 interface StatisticalTestsViewProps {
   dataset: DatasetMeta | null;
@@ -141,16 +142,16 @@ export const StatisticalTestsView: React.FC<StatisticalTestsViewProps> = ({
                 <tr key={idx} className="hover:bg-slate-900/60 transition-colors">
                   <td className="px-4 py-3 font-bold text-white">{res.featureName}</td>
                   <td className="px-4 py-3 text-slate-300 font-sans">{res.statisticName}</td>
-                  <td className="px-4 py-3">{res.statisticValue}</td>
-                  <td className="px-4 py-3">{res.pValue}</td>
+                  <td className="px-4 py-3">{safeDisplay(res.statisticValue)}</td>
+                  <td className="px-4 py-3">{safeDisplay(res.pValue)}</td>
                   {useFDR && (
                     <td className="px-4 py-3 font-bold text-cyan-400">
-                      {res.adjustedPValue}
+                      {safeDisplay(res.adjustedPValue)}
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    <span className="font-bold text-white">{res.effectSizeValue}</span>{' '}
-                    <span className="text-slate-400 font-sans text-[11px]">({res.effectInterpretation})</span>
+                    <span className="font-bold text-white">{safeDisplay(res.effectSizeValue)}</span>{' '}
+                    <span className="text-slate-400 font-sans text-[11px]">({safeDisplay(res.effectInterpretation)})</span>
                   </td>
                   <td className="px-4 py-3 font-sans text-[11px]">
                     {res.significant ? (
