@@ -1,0 +1,6 @@
+{
+  "name": "Insurance Claim Prediction System",
+  "description": "Production-grade statistical learning platform and predictive analytics dashboard for high-performance insurance claim prediction, EDA, and risk scoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

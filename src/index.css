@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0b1020;
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+}
+
+/* Custom dark glassmorphism & neon glow utilities */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
+}
+
+.glow-violet {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.25);
+}
+
+.glow-magenta {
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.25);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 25px rgba(52, 211, 153, 0.25);
+}
+
+/* Subtle Animated Data Grid Mesh */
+.bg-mesh-pattern {
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(79, 124, 255, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 100% 50%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(34, 211, 238, 0.1) 0%, transparent 60%);
+}
+
+/* Smooth custom scrollbar for dark tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1020;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
