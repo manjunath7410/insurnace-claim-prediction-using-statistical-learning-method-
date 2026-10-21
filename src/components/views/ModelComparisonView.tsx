@@ -38,7 +38,9 @@ export const ModelComparisonView: React.FC<ModelComparisonViewProps> = ({ models
   );
 
   const cm = reEvaluatedMetrics.confusionMatrix;
-  const totalFinancialCost = cm.fp * costFP + cm.fn * costFN;
+  const safeCostFP = isNaN(costFP) ? 100 : costFP;
+  const safeCostFN = isNaN(costFN) ? 1200 : costFN;
+  const totalFinancialCost = ((cm?.fp || 0) * safeCostFP) + ((cm?.fn || 0) * safeCostFN);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-[1440px] mx-auto text-slate-100 bg-[#0B1020] min-h-screen">

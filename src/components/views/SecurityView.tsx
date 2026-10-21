@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, UserCheck, Key, Eye, ShieldAlert, Sparkles } from 'lucide-react';
+import { ShieldCheck, Lock, UserCheck, Key, Eye, ShieldAlert, Sparkles, Globe, Server, ExternalLink } from 'lucide-react';
 import { AuditLogEntry, UserSession } from '../../types';
 import { USER_ROLES, encryptSensitiveData } from '../../utils/security';
 
@@ -135,6 +135,60 @@ export const SecurityView: React.FC<SecurityViewProps> = ({ session }) => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Cloud & Vercel Deployment Diagnostics */}
+      <div className="bg-[#111827]/90 rounded-2xl border border-slate-800/80 p-6 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Globe className="w-4 h-4 text-cyan-400" />
+              Cloud Deployment & Vercel Hosting Specification
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Optimized for zero-config deployment on Vercel with automated client bundling and serverless API endpoints.
+            </p>
+          </div>
+
+          <a
+            href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmanjunath7410%2Finsurnace-claim-prediction-using-statistical-learning-method-"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-slate-900 text-white rounded-xl text-xs font-bold border border-slate-700/80 hover:border-slate-500 shadow-md transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
+            </svg>
+            <span>Deploy to My Vercel</span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="p-4 bg-slate-900/70 border border-slate-800 rounded-xl space-y-1">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Repository</span>
+            <div className="text-xs font-mono font-bold text-violet-300 truncate">
+              manjunath7410/insurnace-claim-prediction...
+            </div>
+            <p className="text-[11px] text-slate-400">Main branch synched to GitHub</p>
+          </div>
+
+          <div className="p-4 bg-slate-900/70 border border-slate-800 rounded-xl space-y-1">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Build & Output</span>
+            <div className="text-xs font-mono font-bold text-emerald-400">
+              vite build &rarr; /dist
+            </div>
+            <p className="text-[11px] text-slate-400">vercel.json configured with SPA rewrites</p>
+          </div>
+
+          <div className="p-4 bg-slate-900/70 border border-slate-800 rounded-xl space-y-1">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Serverless API</span>
+            <div className="text-xs font-mono font-bold text-cyan-400">
+              /api/health & /api/dataset/sync
+            </div>
+            <p className="text-[11px] text-slate-400">Instant serverless handlers included</p>
+          </div>
         </div>
       </div>
     </div>

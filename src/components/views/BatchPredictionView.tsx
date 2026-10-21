@@ -77,8 +77,8 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
         const r = recordsToScore[i];
         let prob = 0.065;
 
-        if (modelProbs.length > i && !isNaN(modelProbs[i])) {
-          prob = Number(modelProbs[i].toFixed(4));
+        if (modelProbs.length > i && !isNaN(modelProbs[i]) && isFinite(modelProbs[i])) {
+          prob = Math.max(0.001, Math.min(0.999, Number(modelProbs[i].toFixed(4))));
         } else {
           let logit = -2.7;
           if (Number(r.age_of_policyholder) < 0.35) logit += 0.35;
@@ -88,7 +88,8 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
           if (r.is_brake_assist === 'No') logit += 0.15;
           if (Number(r.ncap_rating) < 2) logit += 0.22;
           if (Number(r.policy_tenure) < 0.2) logit += 0.28;
-          prob = Number((1 / (1 + Math.exp(-logit))).toFixed(4));
+          const p = 1 / (1 + Math.exp(-logit));
+          prob = isNaN(p) || !isFinite(p) ? 0.065 : Math.max(0.001, Math.min(0.999, Number(p.toFixed(4))));
         }
 
         probSum += prob;
@@ -132,7 +133,7 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
         totalClaimsPredicted: claimsCount,
         totalNonClaimsPredicted: nonClaimsCount,
         highRiskCount,
-        averageProbability: Number((probSum / total).toFixed(4)),
+        averageProbability: total > 0 ? Number((probSum / total).toFixed(4)) : 0,
         processingTimeMs,
         predictions,
       });
@@ -157,8 +158,8 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
 
     const csvRows = targetRecords.map((r, i) => {
       let prob = 0.065;
-      if (modelProbs.length > i && !isNaN(modelProbs[i])) {
-        prob = Number(modelProbs[i].toFixed(4));
+      if (modelProbs.length > i && !isNaN(modelProbs[i]) && isFinite(modelProbs[i])) {
+        prob = Math.max(0.001, Math.min(0.999, Number(modelProbs[i].toFixed(4))));
       } else {
         let logit = -2.7;
         if (Number(r.age_of_policyholder) < 0.35) logit += 0.35;
@@ -168,7 +169,8 @@ export const BatchPredictionView: React.FC<BatchPredictionViewProps> = ({
         if (r.is_brake_assist === 'No') logit += 0.15;
         if (Number(r.ncap_rating) < 2) logit += 0.22;
         if (Number(r.policy_tenure) < 0.2) logit += 0.28;
-        prob = Number((1 / (1 + Math.exp(-logit))).toFixed(4));
+        const p = 1 / (1 + Math.exp(-logit));
+        prob = isNaN(p) || !isFinite(p) ? 0.065 : Math.max(0.001, Math.min(0.999, Number(p.toFixed(4))));
       }
 
       const predClass = prob >= (activeModel?.decisionThreshold || 0.5) ? 1 : 0;

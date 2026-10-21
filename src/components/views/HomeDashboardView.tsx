@@ -100,6 +100,19 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
               <Zap className="w-4 h-4 text-amber-400" />
               <span>Explore Single Policy Predictor</span>
             </button>
+
+            <a
+              href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmanjunath7410%2Finsurnace-claim-prediction-using-statistical-learning-method-"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-3 bg-black hover:bg-slate-900 text-white border border-slate-700/80 hover:border-slate-500 font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md group"
+              title="One-click deploy to Vercel"
+            >
+              <svg className="w-3.5 h-3.5 fill-white group-hover:scale-110 transition-transform" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
+              </svg>
+              <span>Deploy to Vercel</span>
+            </a>
           </div>
         </div>
       </div>

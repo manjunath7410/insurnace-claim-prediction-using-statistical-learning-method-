@@ -110,7 +110,8 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
         try {
           const { X } = pipeline.transform([formData]);
           const probaArr = rawModel.predictProba(X);
-          prob = Number(probaArr[0].toFixed(4));
+          const rawP = Number(probaArr?.[0]);
+          prob = isNaN(rawP) || !isFinite(rawP) ? 0.065 : Math.max(0.001, Math.min(0.999, rawP));
         } catch {
           // Fallback to statistical risk logit
           prob = computeStatisticalLogit(formData);
@@ -169,7 +170,8 @@ export const SinglePredictionView: React.FC<SinglePredictionViewProps> = ({
     if (data.is_brake_assist === 'No') logit += 0.18;
     if (Number(data.ncap_rating) < 2) logit += 0.25;
     if (Number(data.policy_tenure) < 0.2) logit += 0.28;
-    return Number((1 / (1 + Math.exp(-logit))).toFixed(4));
+    const p = 1 / (1 + Math.exp(-logit));
+    return isNaN(p) || !isFinite(p) ? 0.065 : Math.max(0.001, Math.min(0.999, Number(p.toFixed(4))));
   };
 
   return (
